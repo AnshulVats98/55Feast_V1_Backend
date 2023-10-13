@@ -25,7 +25,7 @@ const MENU_ITEM_ADDED = "Menu item has been added";
 const MENU_ITEM_UPDATED = "Menu item has been updated";
 const ITEM_NOT_FOUND = "Menu item not found";
 const MENU_ITEM_DELETED_SUCCESS =
-  "Menu item has been deleted successfully deleted";
+  "Menu item has been deleted successfully";
 const MENU_FETCHED = "Menu items fetched successfully";
 const INCORRECT_DATE = "Invalid date entered";
 const COUNTS_DELETED_SUCCESS = "All counts cancelled successfully";
