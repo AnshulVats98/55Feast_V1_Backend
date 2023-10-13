@@ -4,7 +4,7 @@ dotenv.config();
 const MONGO_URI = process.env.MONGO_URI;
 const SECRET = process.env.SECRET;
 const JWT_EXPIRY = 2592000;
-const USER_POOL_URL = "https://naughty-mite-girdle.cyclic.app/user";
+const USER_POOL_URL = "https://userpool.onrender.com";
 const EMAIL_API_KEY = process.env.EMAIL_API_KEY;
 const SENDER_EMAIL = process.env.SENDER_EMAIL;
 const PORT = process.env.PORT;
