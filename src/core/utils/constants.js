@@ -22,7 +22,7 @@ const COUNTS_FETCHED_SUCCESS = "Counts fetched successfully";
 const TOKEN_EXPIRED = "JWT token expired";
 const UNAUTHARIZED = "Unauthorized";
 const MENU_ITEM_ADDED = "Menu item has been added";
-const MENU_ITEM_UPDATED = "Menu item has been updated";
+const MENU_ITEM_UPDATED = "Menu item updated successfully";
 const ITEM_NOT_FOUND = "Menu item not found";
 const MENU_ITEM_DELETED_SUCCESS =
   "Menu item has been deleted successfully";
