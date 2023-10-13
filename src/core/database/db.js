@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 import config from "../../../config";
-// import { startCronJob } from "../utils";
 
 mongoose
   .connect(config.MONGO_URI, {
@@ -9,8 +8,6 @@ mongoose
   })
   .then(() => {
     console.log("Successfully connected to MongoDB");
-    // startCronJob();
-    // console.log("cron job started");
   })
   .catch((error) => {
     console.log("Failed to connect to DB", error.message);
