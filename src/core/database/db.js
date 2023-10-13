@@ -8,7 +8,7 @@ mongoose
     useUnifiedTopology: true,
   })
   .then(() => {
-    console.log("Connected to MongoDB");
+    console.log("Successfully connected to MongoDB");
     // startCronJob();
     // console.log("cron job started");
   })
