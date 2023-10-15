@@ -6,8 +6,6 @@ import {
   globalCatch,
 } from "../../utils";
 import { mealModel, userModel } from "../../models";
-import config from "../../../../config";
-import axios from "axios";
 
 const bookYourMeal = async (request, response) => {
   try {
@@ -174,18 +172,11 @@ const getAllCountOfDate = async (request, response) => {
       bookedDates: { $in: [date] },
     });
     const users = foundUsers.map(async (element) => {
-      const options = {
-        method: "GET",
-        url: `${config.USER_POOL_URL}?email=${element.email}`,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      };
-      const foundUser = await axios.request(options);
+      const foundUser = await userModel.findOne({ email: element.email });
       return {
-        fullName: foundUser.data.data.fullName,
+        fullName: `${foundUser.firstName} ${foundUser.lastName}`,
         email: element.email,
-        location: foundUser.data.data.location,
+        location: foundUser.location,
       };
     });
     const result = await Promise.all(await users);
@@ -251,15 +242,8 @@ const getCounts = async (date, location) => {
     bookedDates: { $in: [date] },
   });
   const users = foundUsers.map(async (element) => {
-    const options = {
-      method: "GET",
-      url: `${config.USER_POOL_URL}?email=${element.email}`,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    };
-    const foundUser = await axios.request(options);
-    return { email: element.email, location: foundUser.data.data.location };
+    const foundUser = await userModel.findOne({ email: element.email });
+    return { email: element.email, location: foundUser.location };
   });
   const result = await Promise.all(await users);
   const count = result.filter((user) => user.location === `${location}`);
@@ -301,13 +285,8 @@ const getTodayNotCountedUsers = async (request, response) => {
       bookedDates: { $nin: [date] },
     });
     const users = foundUsers.map(async (element) => {
-      const options = {
-        method: "GET",
-        url: `${config.USER_POOL_URL}?email=${element.email}`,
-        headers: { "Content-Type": "application/json" },
-      };
-      const foundUser = await axios.request(options);
-      return { fullName: foundUser.data.data.fullName, email: element.email };
+      const foundUser = await userModel.findOne({email: element.email});
+      return { fullName: `${foundUser.firstName} ${foundUser.lastName}`, email: element.email };
     });
     return sendResponse(
       onSuccess(

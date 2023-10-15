@@ -28,25 +28,6 @@ const getAllUsers = async (request, response) => {
   }
 };
 
-const getUserByLocation = async (request, response) => {
-  try {
-    const { location } = request.query;
-    const users = await axios.get(
-      config.USER_POOL_URL + `/location/all?location=${location}`
-    );
-    return sendResponse(
-      onSuccess(200, messageResponse.USERS_FOUND_SUCCESS, users.data),
-      response
-    );
-  } catch (error) {
-    globalCatch(request, error);
-    return sendResponse(
-      onError(500, messageResponse.ERROR_FETCHING_DATA),
-      response
-    );
-  }
-};
-
 const getUser = async (request, response) => {
   try {
     const { email } = request.body;
@@ -260,7 +241,6 @@ const inviteUser = async (request, response) => {
 
 export default {
   getAllUsers,
-  getUserByLocation,
   getUser,
   getJoinedUsers,
   insertUser,
