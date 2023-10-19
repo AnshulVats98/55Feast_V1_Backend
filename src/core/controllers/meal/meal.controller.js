@@ -243,10 +243,10 @@ const getCounts = async (date, location) => {
   });
   const users = foundUsers.map(async (element) => {
     const foundUser = await userModel.findOne({ email: element.email });
-    return { email: element.email, location: foundUser.location };
+    return { email: element.email, location: foundUser?.location };
   });
   const result = await Promise.all(await users);
-  const count = result.filter((user) => user.location === `${location}`);
+  const count = result.filter((user) => user.location === location);
   return count.length;
 };
 
