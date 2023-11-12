@@ -30,8 +30,18 @@ const MENU_FETCHED = "Menu items fetched successfully";
 const INCORRECT_DATE = "Invalid date entered";
 const COUNTS_DELETED_SUCCESS = "All counts cancelled successfully";
 const BOOK_YOUR_FIRST_MEAL = "Book your first meal";
+const MAIL_SENT_SUCCESS = "Email sent successfully";
+const PASSWORD_RESET_SUCCESS = "Password reset successfully";
+const LINK_EXPIRED = "Link expired";
+const CORRECT_PASSWORD = "Correct password";
+const PASSWORD_UPDATED = "Password updated successfully";
 
 export default {
+  PASSWORD_UPDATED,
+  CORRECT_PASSWORD,
+  LINK_EXPIRED,
+  PASSWORD_RESET_SUCCESS,
+  MAIL_SENT_SUCCESS,
   EMAIL_EXIST,
   CREATED_SUCCESS,
   ERROR_FETCHING_DATA,

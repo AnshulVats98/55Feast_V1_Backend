@@ -1,4 +1,5 @@
 import config from "../../../../config";
+import { tokenModel, userModel } from "../../models/index.js";
 import {
   onError,
   onSuccess,
@@ -8,6 +9,8 @@ import {
 } from "../../utils/index.js";
 import axios from "axios";
 import SibApiV3Sdk from "sib-api-v3-sdk";
+import crypto from "crypto";
+import bcrypt from "bcryptjs";
 
 const getAllUsers = async (request, response) => {
   try {
@@ -239,6 +242,143 @@ const inviteUser = async (request, response) => {
   }
 };
 
+const forgotPassword = async (request, response) => {
+  try {
+    const { email } = request.body;
+    const user = await userModel.findOne({ email });
+    if (!user)
+      return sendResponse(onError(404, messageResponse.NOT_EXIST), response);
+    let token = await tokenModel.findOne({ userId: user._id });
+    if (!token) {
+      token = await new tokenModel({
+        userId: user._id,
+        token: crypto.randomBytes(32).toString("hex"),
+      }).save();
+    }
+    const defaultClient = SibApiV3Sdk.ApiClient.instance;
+    const apiKey = defaultClient.authentications["api-key"];
+    apiKey.apiKey = config.EMAIL_API_KEY;
+    const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+    const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+
+    sendSmtpEmail.sender = {
+      email: config.SENDER_EMAIL,
+      name: "55Feast",
+    };
+    sendSmtpEmail.subject = "Reset password of 55Feast";
+    sendSmtpEmail.replyTo = {
+      email: config.SENDER_EMAIL,
+      name: "55Feast",
+    };
+    sendSmtpEmail.to = [{ name: user.firstName, email: email }];
+    sendSmtpEmail.templateId = 4;
+    const link = `${config.RESET_PASSWORD_URL}/${user._id}/${token.token}`;
+    sendSmtpEmail.params = {
+      url: link,
+    };
+    const res = await apiInstance.sendTransacEmail(sendSmtpEmail);
+    return sendResponse(
+      onSuccess(200, messageResponse.MAIL_SENT_SUCCESS),
+      response
+    );
+  } catch (error) {
+    globalCatch(request, error);
+    return sendResponse(
+      onError(500, messageResponse.ERROR_FETCHING_DATA),
+      response
+    );
+  }
+};
+
+const updatePassword = async (request, response) => {
+  try {
+    const user = await userModel.findById(request.params.userId);
+    if (!user)
+      return sendResponse(onError(404, messageResponse.NOT_EXIST), response);
+    const token = await tokenModel.findOne({
+      userId: user._id,
+      token: request.params.token,
+    });
+    if (!token)
+      return sendResponse(onError(400, messageResponse.LINK_EXPIRED), response);
+
+      const salt = await bcrypt.genSalt(10);
+    const newHashedPassword = await bcrypt.hash(request.body.newPassword, salt);
+    const updatedUser = await userModel.findByIdAndUpdate(
+      request.params.userId,
+      { password: newHashedPassword },
+      { new: true }
+    );
+    await tokenModel.findOneAndDelete({
+      userId: user._id,
+      token: request.params.token,
+    });
+    return sendResponse(
+      onSuccess(200, messageResponse.PASSWORD_RESET_SUCCESS, updatedUser),
+      response
+    );
+  } catch (error) {
+    globalCatch(request, error);
+    return sendResponse(
+      onError(500, messageResponse.ERROR_FETCHING_DATA),
+      response
+    );
+  }
+};
+
+const checkPassword = async (request, response) => {
+  try {
+    const { email, oldPassword } = request.body;
+    const user = await userModel.findOne({ email });
+    if (!user) {
+      return sendResponse(onError(404, messageResponse.NOT_EXIST), response);
+    }
+    const validPassword = bcrypt.compareSync(oldPassword, user["password"]);
+    if (validPassword) {
+      return sendResponse(
+        onSuccess(200, messageResponse.CORRECT_PASSWORD),
+        response
+      );
+    }
+    return sendResponse(
+      onError(400, messageResponse.INVALID_PASSWORD),
+      response
+    );
+  } catch (error) {
+    globalCatch(request, error);
+    return sendResponse(
+      onError(500, messageResponse.ERROR_FETCHING_DATA),
+      response
+    );
+  }
+};
+
+const resetPassword = async (request, response) => {
+  try {
+    const { email, newPassword } = request.body;
+    const user = await userModel.findOne({ email });
+    if (!user) {
+      return sendResponse(onError(404, messageResponse.NOT_EXIST), response);
+    }
+    const salt = await bcrypt.genSalt(10);
+    const newHashedPassword = await bcrypt.hash(newPassword, salt);
+    const updatedUser = await userModel.findOneAndUpdate(
+      { email },
+      { password: newHashedPassword },
+      { new: true }
+    );
+    return sendResponse(
+      onSuccess(200, messageResponse.PASSWORD_UPDATED, updatedUser),
+      response
+    );
+  } catch (error) {
+    return sendResponse(
+      onError(500, messageResponse.ERROR_FETCHING_DATA),
+      response
+    );
+  }
+};
+
 export default {
   getAllUsers,
   getUser,
@@ -248,4 +388,8 @@ export default {
   deleteUser,
   getNotJoinedUsers,
   inviteUser,
+  forgotPassword,
+  updatePassword,
+  checkPassword,
+  resetPassword
 };
